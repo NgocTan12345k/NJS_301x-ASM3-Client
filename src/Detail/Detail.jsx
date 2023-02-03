@@ -6,7 +6,7 @@ import alertify from "alertifyjs";
 import { addCart } from "../Redux/Action/ActionCart";
 import CartAPI from "../API/CartAPI";
 import queryString from "query-string";
-import CommentAPI from "../API/CommentAPI";
+// import CommentAPI from "../API/CommentAPI";
 import convertMoney from "../convertMoney";
 import axios from "axios";
 
@@ -33,18 +33,8 @@ function Detail(props) {
 
   const [product, setProduct] = useState([]);
 
-  const [star, setStar] = useState(1);
-
-  const [comment, setComment] = useState("");
-
   // id_user đã đăng nhập
   const idUser = useSelector((state) => state.Session.idUser);
-
-  // Listcomment
-  const [list_comment, set_list_comment] = useState([]);
-
-  // state này dùng để load lại comment khi user gửi comment lên
-  const [load_comment, set_load_comment] = useState(false);
 
   useEffect(() => {
     //Hàm này để lấy dữ liệu chi tiết sản phẩm
@@ -66,99 +56,6 @@ function Detail(props) {
     getProductDetail();
     getAllProducts();
   }, [id]);
-
-  // Hàm này dùng để lấy dữ liệu comment
-  // Hàm này sẽ chạy lại phụ thuộc vào id Param
-  useEffect(() => {
-    const fetchData = async () => {
-      const params = {
-        idProduct: id,
-      };
-
-      const query = "?" + queryString.stringify(params);
-
-      const response = await CommentAPI.getCommentProduct(query);
-      console.log(response);
-
-      set_list_comment(response);
-    };
-
-    fetchData();
-  }, [id]);
-
-  // Hàm thay đổi sao đánh giá
-  const onChangeStar = (e) => {
-    setStar(e.target.value);
-  };
-
-  // Hàm thay đổi comment
-  const onChangeComment = (e) => {
-    setComment(e.target.value);
-  };
-
-  // Hàm này dùng để bình luận
-  const handlerComment = () => {
-    if (idUser === "") {
-      alertify.set("notifier", "position", "bottom-left");
-      alertify.error("Vui Lòng Kiểm Tra Đăng Nhập!");
-      return;
-    }
-
-    const fetchSendComment = async () => {
-      const params = {
-        idProduct: id,
-        idUser: localStorage.getItem("id_user"),
-        fullname: localStorage.getItem("name_user"),
-        content: comment,
-        star: star,
-      };
-
-      const query = "?" + queryString.stringify(params);
-
-      const response = await CommentAPI.postCommentProduct(query);
-      console.log(response);
-
-      set_load_comment(true);
-    };
-
-    fetchSendComment();
-
-    setComment("");
-  };
-
-  // Hàm này dùng để load lại dữ liệu comment
-  // Phụ thuộc vào state load_comment
-  useEffect(() => {
-    if (load_comment) {
-      const fetchData = async () => {
-        const params = {
-          idProduct: id,
-        };
-
-        const query = "?" + queryString.stringify(params);
-
-        const response = await CommentAPI.getCommentProduct(query);
-        console.log(response);
-
-        set_list_comment(response);
-      };
-
-      fetchData();
-
-      set_load_comment(false);
-    }
-  }, [load_comment]);
-
-  //Hàm này gọi API và cắt chỉ lấy 4 sản phẩm
-  //   useEffect(() => {
-  //     const fetchData = async () => {
-  //       const response = await ProductAPI.getAPI();
-  //       const data = response;
-  //       setProduct(data);
-  //     };
-
-  //     fetchData();
-  //   }, []);
 
   //Phần này là để thay đổi số lượng khi mua sản phẩm
   const [text, setText] = useState(1);
@@ -182,23 +79,13 @@ function Detail(props) {
     setText(value);
   };
 
-  //Hàm này để lấy dữ liệu chi tiết sản phẩm
-  //   useEffect(() => {
-  //     const fetchData = async () => {
-  //       const response = await ProductAPI.getDetail(id);
-  //       console.log(response);
-  //       setDetail(response);
-  //     };
-
-  //     fetchData();
-  //   }, [id]);
-
   //Phần này dùng để xem review hay description
   const [review, setReview] = useState("description");
   const handlerReview = (value) => {
     setReview(value);
   };
 
+  // console.log("detail-->", detail);
   //Hàm này là Thêm Sản Phẩm
   const addToCart = () => {
     let id_user_cart = "";
@@ -211,45 +98,75 @@ function Detail(props) {
 
     // console.log("id_user_cart-->", id_user_cart);
 
-    const data = {
-      idUser: id_user_cart,
-      idProduct: detail._id,
-      nameProduct: detail.name,
-      priceProduct: detail.price,
-      count: text,
-      img: detail.img1,
-    };
-
-    const action = addCart(data);
-    // const actionAddUser = addUser(data.idUser);
-    // console.log("action-->", action);
-    dispatch(action);
-    // console.log("data-->", data);
-    // console.log("x-->", localStorage.getItem("id_user"));
-
     if (localStorage.getItem("id_user")) {
       console.log("Bạn Đã Đăng Nhập!");
 
-      const fetchPost = async () => {
-        const params = {
-          idUser: id_user_cart, //localStorage.getItem('id_user')
-          idProduct: detail._id, // Lấy idProduct
-          count: text, // Lấy số lượng
+      if (detail.quantity === 0) {
+        alert("Products in stock are out of stock!");
+        return;
+      } else {
+        console.log("text-->", text);
+        const data = {
+          idUser: id_user_cart,
+          idProduct: detail._id,
+          nameProduct: detail.name,
+          priceProduct: detail.price,
+          count: text,
+          img: detail.img1,
         };
+        const action = addCart(data);
+        dispatch(action);
+        console.log("data.quantity", data.quantity);
+        if (text > detail.quantity) {
+          alert(
+            "You cannot order more products than the number of products left in stock"
+          );
+          return;
+        } else {
+          const updateQuantity = parseInt(detail.quantity) - parseInt(text);
+          console.log("updateQuantity-->", updateQuantity);
+          const fetchPost = async () => {
+            const params = {
+              idUser: id_user_cart, //localStorage.getItem('id_user')
+              idProduct: detail._id, // Lấy idProduct
+              count: text, // Lấy số lượng
+            };
 
-        // console.log("params-->", params);
+            // console.log("params-->", params);
 
-        const query = "?" + queryString.stringify(params);
+            const query = "?" + queryString.stringify(params);
 
-        // console.log("query-->", query);
+            // console.log("query-->", query);
 
-        const response = await CartAPI.postAddToCart(query);
-        console.log("response-->", response);
-        // const action = addCart(data);
-        // console.log("action-->", action);
-        // dispatch(action);
-      };
-      fetchPost();
+            const response = await CartAPI.postAddToCart(query);
+            console.log("response-->", response);
+          };
+          const updateProduct = () => {
+            fetch(`http://localhost:3500/api/product/update/${id}`, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ quantity: updateQuantity }),
+            })
+              .then((res) => {
+                return res.json();
+              })
+              .then((data) => {
+                if (data) {
+                  alertify.set("notifier", "position", "bottom-left");
+                  alertify.success("Bạn Đã Thêm Hàng Thành Công!");
+                  setDetail(data);
+                } else {
+                  alert("Update Product unsuccessful!");
+                }
+              })
+              .catch((error) => {
+                console.log(error);
+              });
+          };
+          updateProduct();
+          fetchPost();
+        }
+      }
     } else {
       // const action = addCart(data);
       // console.log("action-->", action);
@@ -257,8 +174,104 @@ function Detail(props) {
       window.location.href("/signin");
     }
 
-    alertify.set("notifier", "position", "bottom-left");
-    alertify.success("Bạn Đã Thêm Hàng Thành Công!");
+    // alertify.set("notifier", "position", "bottom-left");
+    // alertify.success("Bạn Đã Thêm Hàng Thành Công!");
+
+    // if (detail.quantity === 0) {
+    //   alert("Products in stock are out of stock!");
+    //   return;
+    // } else {
+    //   const data = {
+    //     idUser: id_user_cart,
+    //     idProduct: detail._id,
+    //     nameProduct: detail.name,
+    //     priceProduct: detail.price,
+    //     count: text,
+    //     img: detail.img1,
+    //   };
+    //   console.log("data.quantity", data.quantity)
+    //   if (data.quantity > detail.quantity) {
+    //     alert("You cannot order more products than the number of products left in stock")
+    //     return;
+    //   } else {
+    //     const action = addCart(data);
+
+    //     dispatch(action);
+
+    //     if (localStorage.getItem("id_user")) {
+    //       console.log("Bạn Đã Đăng Nhập!");
+
+    //       const fetchPost = async () => {
+    //         const params = {
+    //           idUser: id_user_cart, //localStorage.getItem('id_user')
+    //           idProduct: detail._id, // Lấy idProduct
+    //           count: text, // Lấy số lượng
+    //         };
+
+    //         const query = "?" + queryString.stringify(params);
+
+    //         const response = await CartAPI.postAddToCart(query);
+    //         console.log("response-->", response);
+
+    //       };
+    //       fetchPost();
+    //     } else {
+    //       window.location.href("/signin");
+    //     }
+    //     alertify.set("notifier", "position", "bottom-left");
+    //     alertify.success("Bạn Đã Thêm Hàng Thành Công!");
+    //   }
+
+    // }
+
+    // const data = {
+    //   idUser: id_user_cart,
+    //   idProduct: detail._id,
+    //   nameProduct: detail.name,
+    //   priceProduct: detail.price,
+    //   count: text,
+    //   img: detail.img1,
+    // };
+
+    // const action = addCart(data);
+    // // const actionAddUser = addUser(data.idUser);
+    // // console.log("action-->", action);
+    // dispatch(action);
+    // // console.log("data-->", data);
+    // // console.log("x-->", localStorage.getItem("id_user"));
+
+    // if (localStorage.getItem("id_user")) {
+    //   console.log("Bạn Đã Đăng Nhập!");
+
+    //   const fetchPost = async () => {
+    //     const params = {
+    //       idUser: id_user_cart, //localStorage.getItem('id_user')
+    //       idProduct: detail._id, // Lấy idProduct
+    //       count: text, // Lấy số lượng
+    //     };
+
+    //     // console.log("params-->", params);
+
+    //     const query = "?" + queryString.stringify(params);
+
+    //     // console.log("query-->", query);
+
+    //     const response = await CartAPI.postAddToCart(query);
+    //     console.log("response-->", response);
+    //     // const action = addCart(data);
+    //     // console.log("action-->", action);
+    //     // dispatch(action);
+    //   };
+    //   fetchPost();
+    // } else {
+    //   // const action = addCart(data);
+    //   // console.log("action-->", action);
+    //   // dispatch(action);
+    //   window.location.href("/signin");
+    // }
+
+    // alertify.set("notifier", "position", "bottom-left");
+    // alertify.success("Bạn Đã Thêm Hàng Thành Công!");
   };
 
   return (
@@ -366,7 +379,7 @@ function Detail(props) {
               <div className="col-sm-5 pr-sm-0">
                 <div className="border d-flex align-items-center justify-content-between py-1 px-3 bg-white border-white">
                   <span className="small text-uppercase text-gray mr-4 no-select">
-                    Quantity
+                    Number of orders
                   </span>
                   <div className="quantity">
                     <button
@@ -392,50 +405,28 @@ function Detail(props) {
               </div>
               <div className="col-sm-3 pl-sm-0">
                 <a
-                  href="/cart"
+                  // href="/cart"
                   className="btn btn-dark btn-sm btn-block d-flex align-items-center justify-content-center px-0 text-white"
                   onClick={addToCart}
                 >
                   Add to cart
                 </a>
               </div>
+
               <br></br>
               <br></br>
             </div>
+            <ul className="list-unstyled small d-inline-block">
+              <li className="mb-3 bg-white text-muted">
+                <strong className="text-uppercase text-dark">
+                  The remaining amount:
+                </strong>
+                <a className="reset-anchor ml-2">{detail.quantity}</a>
+              </li>
+            </ul>
           </div>
         </div>
-        {/* <div className='form-group'>
-					<label htmlFor='exampleFormControlTextarea1'>Comment:</label>
-					<textarea
-						className='form-control'
-						rows='3'
-						onChange={onChangeComment}
-						value={comment}></textarea>
-				</div> */}
-        {/* <div className='d-flex justify-content-between'>
-					<div className='d-flex w-25'>
-						<span className='mt-2'>Evaluate: </span>
-						&nbsp; &nbsp;
-						<input
-							className='form-control w-25'
-							type='number'
-							min='1'
-							max='5'
-							value={star}
-							onChange={onChangeStar}
-						/>
-						&nbsp; &nbsp;
-						<span className='mt-2'>Star</span>
-					</div>
-					<div>
-						<a
-							className='btn btn-dark btn-sm btn-block px-0 text-white'
-							style={{ width: '12rem' }}
-							onClick={handlerComment}>
-							Send
-						</a>
-					</div>
-				</div> */}
+
         <br />
         <ul className="nav nav-tabs border-0">
           <li className="nav-item">
@@ -482,7 +473,7 @@ function Detail(props) {
             <div className="tab-pane fade show active">
               <div className="p-4 p-lg-5 bg-white">
                 <div className="row">
-                  <div className="col-lg-8">
+                  {/* <div className="col-lg-8">
                     {list_comment &&
                       list_comment.map((value) => (
                         <div className="media mb-3" key={value._id}>
@@ -522,7 +513,7 @@ function Detail(props) {
                           </div>
                         </div>
                       ))}
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </div>

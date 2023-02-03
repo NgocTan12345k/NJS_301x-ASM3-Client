@@ -42,6 +42,7 @@ function Cart(props) {
   useEffect(() => {
     const fetchDataRedux = () => {
       if (!localStorage.getItem("id_user")) {
+        debugger;
         setCart(listCart);
 
         getTotal(listCart);
@@ -74,7 +75,7 @@ function Cart(props) {
 
         const query = "?" + queryString.stringify(params);
 
-        // console.log(query);
+        console.log("query-->", query);
 
         const response = await CartAPI.getCarts(query);
 
@@ -169,7 +170,29 @@ function Cart(props) {
         const response = await CartAPI.putToCart(query);
         console.log("response-->", response);
       };
-
+      // const updateProduct = () => {
+      //   fetch(`http://localhost:3500/api/product/update/${getProduct}`, {
+      //     method: "PUT",
+      //     headers: { "Content-Type": "application/json" },
+      //     body: JSON.stringify({ quantity: getCount }),
+      //   })
+      //     .then((res) => {
+      //       return res.json();
+      //     })
+      //     .then((data) => {
+      //       if (data) {
+      //         // alert("Update Product successful!");
+      //         alertify.set("notifier", "position", "bottom-left");
+      //         alertify.success("Bạn Đã Sửa Hàng Thành Công!");
+      //       } else {
+      //         alert("Update Product unsuccessful!");
+      //       }
+      //     })
+      //     .catch((error) => {
+      //       console.log(error);
+      //     });
+      // };
+      // updateProduct();
       fetchPut();
 
       //Sau đó thay đổi state loadAPI và load lại hàm useEffect
@@ -247,11 +270,13 @@ function Cart(props) {
         <h2 className="h5 text-uppercase mb-4">Shopping cart</h2>
         <div className="row">
           <div className="col-lg-8 mb-4 mb-lg-0">
-            <ListCart
-              listCart={cart}
-              onDeleteCart={onDeleteCart}
-              onUpdateCount={onUpdateCount}
-            />
+            {cart && cart.length > 0 && (
+              <ListCart
+                listCart={cart}
+                onDeleteCart={onDeleteCart}
+                onUpdateCount={onUpdateCount}
+              />
+            )}
 
             <div className="bg-light px-4 py-3">
               <div className="row align-items-center text-center">

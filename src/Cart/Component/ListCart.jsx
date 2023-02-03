@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 import convertMoney from "../../convertMoney";
@@ -17,10 +17,17 @@ ListCart.defaultProps = {
 
 function ListCart(props) {
   const { listCart, onDeleteCart, onUpdateCount } = props;
+  const [order, setOrder] = useState(listCart);
 
-  const handlerChangeText = (e) => {
-    console.log(e.target.value);
+  const handlerChangeText = (e, orderOld) => {
+    const { value } = e.target;
+    const orderNew = listCart.find((x) => x._id === orderOld._id);
+    if (orderNew) {
+      orderNew.count = value;
+      orderNew.count = setOrder([...order, orderNew]);
+    }
   };
+  // onUpdateCount(order);
 
   const handlerDelete = (getUser, getProduct) => {
     if (!onDeleteCart) {
@@ -31,6 +38,7 @@ function ListCart(props) {
   };
 
   const handlerDown = (getIdUser, getIdProduct, getCount) => {
+    console.log("getIDProduct-->", getIdProduct);
     if (!onUpdateCount) {
       return;
     }
@@ -55,8 +63,6 @@ function ListCart(props) {
 
     onUpdateCount(getIdUser, getIdProduct, updateCount);
   };
-
-  //   console.log("listcart-->", listCart);
 
   return (
     <div className="table-responsive mb-4">
@@ -90,7 +96,84 @@ function ListCart(props) {
           </tr>
         </thead>
         <tbody>
-          {listCart &&
+          {order &&
+            order.map((value, index) => (
+              <tr className="text-center" key={index}>
+                <td className="pl-0 border-0">
+                  <div className="media align-items-center justify-content-center">
+                    <Link
+                      className="reset-anchor d-block animsition-link"
+                      to={`/detail/${value.idProduct}`}
+                    >
+                      <img src={value.img} alt="..." width="70" />
+                    </Link>
+                  </div>
+                </td>
+                <td className="align-middle border-0">
+                  <div className="media align-items-center justify-content-center">
+                    <Link
+                      className="reset-anchor h6 animsition-link"
+                      to={`/detail/${value.idProduct}`}
+                    >
+                      {value.nameProduct}
+                    </Link>
+                  </div>
+                </td>
+
+                <td className="align-middle border-0">
+                  <p className="mb-0 small">
+                    {convertMoney(value.priceProduct)} VND
+                  </p>
+                </td>
+                <td className="align-middle border-0">
+                  <div className="quantity justify-content-center">
+                    <button
+                      className="dec-btn p-0"
+                      style={{ cursor: "pointer" }}
+                      onClick={() =>
+                        handlerDown(value.idUser, value.idProduct, value.count)
+                      }
+                    >
+                      <i className="fas fa-caret-left"></i>
+                    </button>
+                    <input
+                      className="form-control form-control-sm border-0 shadow-0 p-0"
+                      type="text"
+                      name="order"
+                      value={value.count}
+                      onChange={(e) => handlerChangeText(e, value)}
+                    />
+                    <button
+                      className="inc-btn p-0"
+                      style={{ cursor: "pointer" }}
+                      onClick={() =>
+                        handlerUp(value.idUser, value.idProduct, value.count)
+                      }
+                    >
+                      <i className="fas fa-caret-right"></i>
+                    </button>
+                  </div>
+                </td>
+                <td className="align-middle border-0">
+                  <p className="mb-0 small">
+                    {convertMoney(
+                      parseInt(value.priceProduct) * parseInt(value.count)
+                    )}{" "}
+                    VND
+                  </p>
+                </td>
+                <td className="align-middle border-0">
+                  <a
+                    className="reset-anchor remove_cart"
+                    style={{ cursor: "pointer" }}
+                    onClick={() => handlerDelete(value.idUser, value.idProduct)}
+                  >
+                    <i className="fas fa-trash-alt small text-muted"></i>
+                  </a>
+                </td>
+              </tr>
+            ))}
+          {/* {listCart &&
             listCart.map((value, index) => (
               <tr className="text-center" key={index}>
                 <td className="pl-0 border-0">
@@ -133,6 +216,7 @@ function ListCart(props) {
                     <input
                       className="form-control form-control-sm border-0 shadow-0 p-0"
                       type="text"
+                      name="order"
                       value={value.count}
                       onChange={handlerChangeText}
                     />
@@ -165,7 +249,7 @@ function ListCart(props) {
                   </a>
                 </td>
               </tr>
-            ))}
+            ))} */}
         </tbody>
       </table>
     </div>
