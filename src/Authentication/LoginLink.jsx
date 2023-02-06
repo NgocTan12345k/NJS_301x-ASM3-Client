@@ -1,18 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useDispatch } from "react-redux";
-import { Link, Redirect } from "react-router-dom";
-// import { deleteSession } from "../Redux/Action/ActionSession";
-// import { useCookies } from "react-cookie";
+import { Link } from "react-router-dom";
+import { deleteSession } from "../Redux/Action/ActionSession";
+
 import axios from "axios";
 
 function LoginLink(props) {
   const roomId = localStorage.getItem("roomId");
-  // const dispatch = useDispatch();
-  // const [cookies, setCookie, removeCookie] = useCookies(["user"]);
+  const dispatch = useDispatch();
 
   const onRedirect = () => {
     const deleteMessenger = async () => {
-      // console.log("roomIdlog-->", roomId);
       const res = await axios.delete(
         `http://localhost:3500/api/messenger/deleteMessenger/${roomId}`
       );
@@ -32,9 +30,9 @@ function LoginLink(props) {
     };
     delete_Session();
     deleteMessenger();
-    // removeCookie("user", { path: "/" });
-    // const action = deleteSession("");
-    // dispatch(action);
+
+    const action = deleteSession("");
+    dispatch(action);
   };
 
   return (

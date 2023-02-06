@@ -1,14 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, Redirect } from "react-router-dom";
-// import UserAPI from '../API/UserAPI';
 import { addSession } from "../Redux/Action/ActionSession";
 import "./Auth.css";
 import queryString from "query-string";
 import CartAPI from "../API/CartAPI";
-import axios from "axios";
 import MessengerAPI from "../API/MessengerAPI";
-// import { useCookies } from "react-cookie";
 
 function SignIn(props) {
   //listCart được lấy từ redux
@@ -17,8 +14,6 @@ function SignIn(props) {
   const [email, setEmail] = useState("");
 
   const [password, setPassword] = useState("");
-
-  const [user, setUser] = useState([]);
 
   const [errorEmail, setErrorEmail] = useState(false);
   const [emailRegex, setEmailRegex] = useState(false);
@@ -29,7 +24,6 @@ function SignIn(props) {
   const [checkPush, setCheckPush] = useState(false);
 
   const dispatch = useDispatch();
-  // const [cookies, setCookie] = useCookies(["user"]);
 
   const onChangeEmail = (e) => {
     setEmail(e.target.value);
@@ -57,7 +51,6 @@ function SignIn(props) {
         } else {
           setEmailRegex(false);
           const Signin = () => {
-            // console.log("email-->", email);
             fetch("http://localhost:3500/api/auth/login", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -80,18 +73,16 @@ function SignIn(props) {
                   localStorage.setItem("id_user", data.user.userId);
                   localStorage.setItem("name_user", data.user.userName);
                   localStorage.setItem("role", data.user.role);
-                  // setCookie("user", data, { path: "/" });
+
                   const action = addSession(localStorage.getItem("id_user"));
                   dispatch(action);
                   setCheckPush(true);
 
                   // Hàm này dùng để tạo các conversation cho user và admin
                   const postConversation = async () => {
-                    // console.log("email-->", email);
                     const params = {
                       email: email,
                       roomId: roomId,
-                      //   password: password,
                     };
 
                     const query = "?" + queryString.stringify(params);
@@ -143,19 +134,6 @@ function SignIn(props) {
       }
     };
 
-    // const getSessionLogin = async () => {
-    //   const res = await axios.get("http://localhost:3500/api/auth/login");
-    //   console.log("res-->", res);
-    // };
-    // getSessionLogin();
-    // axios
-    //   .get("http://localhost:3500/api/auth/login")
-    //   .then((resuilt) => {
-    //     console.log("resuilt-->", resuilt);
-    //   })
-    //   .catch((err) => {
-    //     console.log(err);
-    //   });
     fetchData();
   }, [checkPush, listCart]);
 

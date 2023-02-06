@@ -23,34 +23,19 @@ function Cart(props) {
   // console.log("listCart-->", listCart);
 
   const [cart, setCart] = useState([]);
-
   const [total, setTotal] = useState();
+  const [updateListCart, setUpdateListCart] = useState([]);
 
   const dispatch = useDispatch();
 
   //State dùng để Load dữ liệu từ Redux
-  const [loadRedux, setLoadRedux] = useState({
-    idProduct: "",
-    count: "",
-  });
+  // const [loadRedux, setLoadRedux] = useState({
+  //   idProduct: "",
+  //   count: "",
+  // });
 
   //State dùng để Load dữ liệu từ API
   const [loadAPI, setLoadAPI] = useState(false);
-
-  //Hàm này dùng để Load dữ liệu ở Redux
-  //Khi người dùng chưa đăng nhập
-  useEffect(() => {
-    const fetchDataRedux = () => {
-      if (!localStorage.getItem("id_user")) {
-        debugger;
-        setCart(listCart);
-
-        getTotal(listCart);
-      }
-    };
-
-    fetchDataRedux();
-  }, [loadRedux]);
 
   //Hàm này dùng để tính tổng tiền carts
   function getTotal(carts) {
@@ -93,8 +78,15 @@ function Cart(props) {
   }, [loadAPI]);
 
   //Hàm này dùng để truyền xuống cho component con xử và trả ngược dữ liệu lại component cha
-  const onDeleteCart = (getUser, getProduct) => {
-    console.log("idUser: " + getUser + ", idProduct: " + getProduct);
+  const onDeleteCart = (getUser, getProduct, getCount) => {
+    // console.log(
+    //   "Count: " +
+    //     getCount +
+    //     ",idUser: " +
+    //     getUser +
+    //     ", idProduct: " +
+    //     getProduct
+    // );
 
     if (localStorage.getItem("id_user")) {
       // user đã đăng nhập
@@ -119,109 +111,6 @@ function Cart(props) {
 
       alertify.set("notifier", "position", "bottom-left");
       alertify.error("Bạn Đã Xóa Hàng Thành Công!");
-    } else {
-      // user chưa đăng nhập
-
-      //Nếu không có phiên làm việc của Session User thì mình sẽ xử lý với Redux
-      const data = {
-        idProduct: getProduct,
-        idUser: getUser,
-      };
-
-      //Đưa dữ liệu vào Redux
-      const action = deleteCart(data);
-      dispatch(action);
-
-      alertify.set("notifier", "position", "bottom-left");
-      alertify.error("Bạn Đã Xóa Hàng Thành Công!");
-
-      //set state loadRedux để nó load lại hàm useEffect để tiếp tục lấy dữ liệu từ redux
-      setLoadRedux({
-        idProduct: getProduct,
-        count: "",
-      });
-    }
-  };
-
-  //Hàm này dùng để truyền xuống cho component con xử và trả ngược dữ liệu lại component cha
-  const onUpdateCount = (getUser, getProduct, getCount) => {
-    console.log(
-      "Count: " +
-        getCount +
-        ", idUser: " +
-        getUser +
-        ", idProduct: " +
-        getProduct
-    );
-
-    if (localStorage.getItem("id_user")) {
-      // user đã đăng nhập
-
-      //Sau khi nhận được dữ liệu ở component con truyền lên thì sẽ gọi API xử lý dữ liệu
-      const fetchPut = async () => {
-        const params = {
-          idUser: getUser,
-          idProduct: getProduct,
-          count: getCount,
-        };
-
-        const query = "?" + queryString.stringify(params);
-
-        const response = await CartAPI.putToCart(query);
-        console.log("response-->", response);
-      };
-      // const updateProduct = () => {
-      //   fetch(`http://localhost:3500/api/product/update/${getProduct}`, {
-      //     method: "PUT",
-      //     headers: { "Content-Type": "application/json" },
-      //     body: JSON.stringify({ quantity: getCount }),
-      //   })
-      //     .then((res) => {
-      //       return res.json();
-      //     })
-      //     .then((data) => {
-      //       if (data) {
-      //         // alert("Update Product successful!");
-      //         alertify.set("notifier", "position", "bottom-left");
-      //         alertify.success("Bạn Đã Sửa Hàng Thành Công!");
-      //       } else {
-      //         alert("Update Product unsuccessful!");
-      //       }
-      //     })
-      //     .catch((error) => {
-      //       console.log(error);
-      //     });
-      // };
-      // updateProduct();
-      fetchPut();
-
-      //Sau đó thay đổi state loadAPI và load lại hàm useEffect
-      setLoadAPI(true);
-
-      console.log("Ban Da Dang Nhap!");
-
-      alertify.set("notifier", "position", "bottom-left");
-      alertify.success("Bạn Đã Sửa Hàng Thành Công!");
-    } else {
-      //Nếu không có phiên làm việc của Session User thì mình sẽ xử lý với Redux
-      const data = {
-        idProduct: getProduct,
-        idUser: getUser,
-        count: getCount,
-      };
-
-      //Đưa dữ liệu vào Redux
-      const action = updateCart(data);
-      dispatch(action);
-
-      alertify.set("notifier", "position", "bottom-left");
-      alertify.success("Bạn Đã Sửa Hàng Thành Công!");
-
-      //set state loadRedux để nó load lại hàm useEffect để tiếp tục lấy dữ liệu từ redux
-      setLoadRedux({
-        idProduct: getProduct,
-        count: getCount,
-      });
     }
   };
 
@@ -229,6 +118,132 @@ function Cart(props) {
   const [redirect, setRedirect] = useState(false);
 
   const onCheckout = () => {
+    console.log("updateListCart-->", updateListCart);
+    console.log("cart-->", cart);
+
+    if (updateListCart && updateListCart.length > 0) {
+      const idProductList = updateListCart.map((item) => {
+        return item.idProduct;
+      });
+      // console.log("idProductList-->", idProductList);
+      const countList = updateListCart.map((item) => {
+        return parseInt(item.count);
+      });
+      console.log("countList", countList);
+
+      const idCartList = updateListCart.map((item) => {
+        return item._id;
+      });
+      const updateProductQuantity = () => {
+        fetch(`http://localhost:3500/api/product/updateQuantity`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            idProductList: idProductList,
+            countList: countList,
+          }),
+        })
+          .then((res) => {
+            return res.json();
+          })
+          .then((data) => {
+            if (data) {
+              console.log("data-->", data);
+            } else {
+              alert("Update Product Quantity unsuccessful!");
+            }
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      };
+      const updateCartCount = () => {
+        fetch(`http://localhost:3500/api/carts/update`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            idCartList: idCartList,
+            countList: countList,
+          }),
+        })
+          .then((res) => {
+            return res.json();
+          })
+          .then((data) => {
+            if (data) {
+              console.log("data-->", data);
+            } else {
+              alert("Update Cart count unsuccessful!");
+            }
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      };
+      updateCartCount();
+      updateProductQuantity();
+    } else {
+      const idProductList = cart.map((item) => {
+        return item.idProduct;
+      });
+      // console.log("idProductList-->", idProductList);
+      const countList = cart.map((item) => {
+        return parseInt(item.count);
+      });
+      console.log("countList", countList);
+      const idCartList = cart.map((item) => {
+        return item._id;
+      });
+      const updateProductQuantity = () => {
+        fetch(`http://localhost:3500/api/product/updateQuantity`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            idProductList: idProductList,
+            countList: countList,
+          }),
+        })
+          .then((res) => {
+            return res.json();
+          })
+          .then((data) => {
+            if (data) {
+              console.log("data-->", data);
+            } else {
+              alert("Update Product Quantity unsuccessful!");
+            }
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      };
+      const updateCartCount = () => {
+        fetch(`http://localhost:3500/api/carts/update`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            idCartList: idCartList,
+            countList: countList,
+          }),
+        })
+          .then((res) => {
+            return res.json();
+          })
+          .then((data) => {
+            if (data) {
+              console.log("data-->", data);
+            } else {
+              alert("Update Cart count unsuccessful!");
+            }
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      };
+      updateCartCount();
+      updateProductQuantity();
+    }
+
     if (!localStorage.getItem("id_user")) {
       alertify.set("notifier", "position", "bottom-left");
       alertify.error("Vui Lòng Kiểm Tra Lại Đăng Nhập!");
@@ -274,17 +289,14 @@ function Cart(props) {
               <ListCart
                 listCart={cart}
                 onDeleteCart={onDeleteCart}
-                onUpdateCount={onUpdateCount}
+                setUpdateListCart={setUpdateListCart}
               />
             )}
 
             <div className="bg-light px-4 py-3">
               <div className="row align-items-center text-center">
                 <div className="col-md-6 mb-3 mb-md-0 text-md-left">
-                  <Link
-                    className="btn btn-link p-0 text-dark btn-sm"
-                    to={`/shop`}
-                  >
+                  <Link className="btn btn-link p-0 text-dark btn-sm" to={`/`}>
                     <i className="fas fa-long-arrow-alt-left mr-2"> </i>
                     Continue shopping
                   </Link>

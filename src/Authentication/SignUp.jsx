@@ -1,10 +1,6 @@
 import React, { useState } from "react";
 import { Link, Redirect } from "react-router-dom";
-import UserAPI from "../API/UserAPI";
 import "./Auth.css";
-import queryString from "query-string";
-import MessengerAPI from "../API/MessengerAPI";
-
 SignUp.propTypes = {};
 
 function SignUp(props) {
@@ -124,62 +120,12 @@ function SignUp(props) {
                     } else {
                       setSuccess(true);
                     }
-                    // if (data) {
-                    // alert("Sign up successs!");
-                    // // Hàm này dùng để tạo các conversation cho user và admin
-                    // const postConversation = async () => {
-                    //   console.log("email-->", email);
-                    //   const params = {
-                    //     email: email,
-                    //     //   password: password,
-                    //   };
-
-                    //   const query = "?" + queryString.stringify(params);
-
-                    //   const response = await MessengerAPI.postConversation(
-                    //     query
-                    //   );
-                    //   console.log("response-->", response);
-                    // };
-
-                    // postConversation();
-                    // }
                   })
                   .catch((error) => {
                     console.log(error);
                   });
-                // const params = {
-                //   fullname: fullname,
-                //   email: email,
-                //   password: password,
-                //   phone: phone,
-                // };
-
-                // const query = "?" + queryString.stringify(params);
-
-                // const response = await UserAPI.postSignUp(query);
-                // console.log("response-->", response);
               };
               SignUp();
-
-              // if (success === true) {
-              //   alert("Sign up successs!");
-              //   // Hàm này dùng để tạo các conversation cho user và admin
-              //   const postConversation = async () => {
-              //     console.log("email-->", email);
-              //     const params = {
-              //       email: email,
-              //       //   password: password,
-              //     };
-
-              //     const query = "?" + queryString.stringify(params);
-
-              //     const response = await MessengerAPI.postConversation(query);
-              //     console.log(response);
-              //   };
-
-              //   postConversation();
-              // }
             }
           }
         }

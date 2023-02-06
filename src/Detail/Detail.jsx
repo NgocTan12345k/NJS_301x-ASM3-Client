@@ -116,15 +116,15 @@ function Detail(props) {
         };
         const action = addCart(data);
         dispatch(action);
-        console.log("data.quantity", data.quantity);
+        // console.log("data.quantity", data.quantity);
         if (text > detail.quantity) {
           alert(
             "You cannot order more products than the number of products left in stock"
           );
           return;
         } else {
-          const updateQuantity = parseInt(detail.quantity) - parseInt(text);
-          console.log("updateQuantity-->", updateQuantity);
+          // const updateQuantity = parseInt(detail.quantity) - parseInt(text);
+          // console.log("updateQuantity-->", updateQuantity);
           const fetchPost = async () => {
             const params = {
               idUser: id_user_cart, //localStorage.getItem('id_user')
@@ -141,29 +141,29 @@ function Detail(props) {
             const response = await CartAPI.postAddToCart(query);
             console.log("response-->", response);
           };
-          const updateProduct = () => {
-            fetch(`http://localhost:3500/api/product/update/${id}`, {
-              method: "PUT",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ quantity: updateQuantity }),
-            })
-              .then((res) => {
-                return res.json();
-              })
-              .then((data) => {
-                if (data) {
-                  alertify.set("notifier", "position", "bottom-left");
-                  alertify.success("Bạn Đã Thêm Hàng Thành Công!");
-                  setDetail(data);
-                } else {
-                  alert("Update Product unsuccessful!");
-                }
-              })
-              .catch((error) => {
-                console.log(error);
-              });
-          };
-          updateProduct();
+          // const updateProduct = () => {
+          //   fetch(`http://localhost:3500/api/product/update/${id}`, {
+          //     method: "PUT",
+          //     headers: { "Content-Type": "application/json" },
+          //     body: JSON.stringify({ quantity: updateQuantity }),
+          //   })
+          //     .then((res) => {
+          //       return res.json();
+          //     })
+          //     .then((data) => {
+          //       if (data) {
+          //         alertify.set("notifier", "position", "bottom-left");
+          //         alertify.success("Bạn Đã Thêm Hàng Thành Công!");
+          //         setDetail(data);
+          //       } else {
+          //         alert("Update Product unsuccessful!");
+          //       }
+          //     })
+          //     .catch((error) => {
+          //       console.log(error);
+          //     });
+          // };
+          // updateProduct();
           fetchPost();
         }
       }
@@ -171,7 +171,8 @@ function Detail(props) {
       // const action = addCart(data);
       // console.log("action-->", action);
       // dispatch(action);
-      window.location.href("/signin");
+      alert("You need to be logged in to continue shopping");
+      window.location.assign("http://localhost:3000/signin");
     }
 
     // alertify.set("notifier", "position", "bottom-left");
@@ -405,7 +406,7 @@ function Detail(props) {
               </div>
               <div className="col-sm-3 pl-sm-0">
                 <a
-                  // href="/cart"
+                  href="/cart"
                   className="btn btn-dark btn-sm btn-block d-flex align-items-center justify-content-center px-0 text-white"
                   onClick={addToCart}
                 >

@@ -8,20 +8,6 @@ import axios from "axios";
 function Home(props) {
   const [products, setProducts] = useState([]);
 
-  //Fetch Product
-  //   useEffect(() => {
-  //     const fetchData = async () => {
-  //       const response = await ProductAPI.getAPI();
-  //       console.log(response);
-
-  //       const data = response.splice(0, 8);
-
-  //       setProducts(data);
-  //     };
-
-  //     fetchData();
-  //   }, []);
-
   useEffect(() => {
     const getAllProducts = async () => {
       const res = await axios.get(
@@ -29,19 +15,10 @@ function Home(props) {
       );
       const data = res && res.data ? res.data : [];
       setProducts(data);
-      //   console.log("res-->", data);
     };
-    // const getSessionLogin = async () => {
-    //   const res = await axios.get("http://localhost:3500/api/auth/login");
-    //   // console.log("res-->", res);
-    //   const data = res && res.data ? res.data : [];
-    //   console.log("data-->", data);
-    // };
-    // getSessionLogin();
+
     getAllProducts();
   }, []);
-
-  // console.log("product-->", products);
 
   return (
     <div className="page-holder">
@@ -212,14 +189,7 @@ function Home(props) {
                           <img className="img-fluid" src={value.img1} alt="" />
                         </a>
                         <div className="product-overlay">
-                          <ul className="mb-0 list-inline">
-                            {/* <li className="list-inline-item m-0 p-0"><a className="btn btn-sm btn-outline-dark" href="#"><i className="far fa-heart"></i></a></li> */}
-                            {/* <li className="list-inline-item m-0 p-0">
-                                                            <Link className="btn btn-sm btn-dark" to={`/detail/${value._id}`}>
-                                                                Add to cart
-                                                            </Link>
-                                                        </li> */}
-                          </ul>
+                          <ul className="mb-0 list-inline"></ul>
                         </div>
                       </div>
                       <h6>

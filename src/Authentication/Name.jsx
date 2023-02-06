@@ -1,28 +1,11 @@
-/* eslint-disable jsx-a11y/anchor-is-valid */
-// import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-// import UserAPI from "../API/UserAPI";
 
 function Name(props) {
-  // const [name, setName] = useState('');
-
-  // useEffect(() => {
-  // 	const fetchData = async () => {
-  // 		const response = await UserAPI.getDetailData(
-  // 			localStorage.getItem('id_user')
-  // 		);
-  // 		setName(response);
-  // 	};
-
-  // 	fetchData();
-  // }, []);
-
   const userName = localStorage.getItem("name_user");
-  //   console.log("userName-->", userName);
 
   return (
     <li className="nav-item dropdown">
-      <a
+      <button
         className="nav-link dropdown-toggle"
         style={{ cursor: "pointer" }}
         id="pagesDropdown"
@@ -31,15 +14,10 @@ function Name(props) {
         aria-expanded="false"
       >
         <i className="fas fa-user-alt mr-1 text-gray"></i>
-        {/* {name.fullname} */}
+
         {userName ? userName : ""}
-      </a>
+      </button>
       <div className="dropdown-menu mt-3" aria-labelledby="pagesDropdown">
-        {/* <Link
-					className='dropdown-item border-0 transition-link'
-					to={'/manage'}>
-					Manage
-				</Link> */}
         <Link
           className="dropdown-item border-0 transition-link"
           to={"/history"}

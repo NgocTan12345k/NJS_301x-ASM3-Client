@@ -16,53 +16,59 @@ ListCart.defaultProps = {
 };
 
 function ListCart(props) {
-  const { listCart, onDeleteCart, onUpdateCount } = props;
+  const { listCart, onDeleteCart, onUpdateCount, setUpdateListCart } = props;
   const [order, setOrder] = useState(listCart);
 
-  const handlerChangeText = (e, orderOld) => {
-    const { value } = e.target;
-    const orderNew = listCart.find((x) => x._id === orderOld._id);
-    if (orderNew) {
-      orderNew.count = value;
-      orderNew.count = setOrder([...order, orderNew]);
+  useEffect(() => {
+    if (listCart) {
+      setOrder(listCart);
     }
-  };
-  // onUpdateCount(order);
+  }, [listCart]);
 
-  const handlerDelete = (getUser, getProduct) => {
+  const handlerChangeText = (e, index) => {
+    // console.log("index-->", index);
+    setOrder((prev) => {
+      const list = [...prev];
+      list[index].count = e.target.value;
+      return list;
+    });
+    setUpdateListCart(order);
+  };
+
+  const handlerDelete = (getUser, getProduct, getCount) => {
     if (!onDeleteCart) {
       return;
     }
 
-    onDeleteCart(getUser, getProduct);
+    onDeleteCart(getUser, getProduct, getCount);
   };
 
-  const handlerDown = (getIdUser, getIdProduct, getCount) => {
-    console.log("getIDProduct-->", getIdProduct);
-    if (!onUpdateCount) {
-      return;
-    }
+  // const handlerDown = (getIdUser, getIdProduct, getCount) => {
+  //   console.log("getIDProduct-->", getIdProduct);
+  //   if (!onUpdateCount) {
+  //     return;
+  //   }
 
-    if (getCount === 1) {
-      return;
-    }
+  //   if (getCount === 1) {
+  //     return;
+  //   }
 
-    //Trước khi trả dữ liệu về component cha thì phải thay đổi biến count
-    const updateCount = parseInt(getCount) - 1;
+  //   //Trước khi trả dữ liệu về component cha thì phải thay đổi biến count
+  //   const updateCount = parseInt(getCount) - 1;
 
-    onUpdateCount(getIdUser, getIdProduct, updateCount);
-  };
+  //   onUpdateCount(getIdUser, getIdProduct, updateCount);
+  // };
 
-  const handlerUp = (getIdUser, getIdProduct, getCount) => {
-    if (!onUpdateCount) {
-      return;
-    }
+  // const handlerUp = (getIdUser, getIdProduct, getCount) => {
+  //   if (!onUpdateCount) {
+  //     return;
+  //   }
 
-    //Trước khi trả dữ liệu về component cha thì phải thay đổi biến count
-    const updateCount = parseInt(getCount) + 1;
+  //   //Trước khi trả dữ liệu về component cha thì phải thay đổi biến count
+  //   const updateCount = parseInt(getCount) + 1;
 
-    onUpdateCount(getIdUser, getIdProduct, updateCount);
-  };
+  //   onUpdateCount(getIdUser, getIdProduct, updateCount);
+  // };
 
   return (
     <div className="table-responsive mb-4">
@@ -127,7 +133,7 @@ function ListCart(props) {
                 </td>
                 <td className="align-middle border-0">
                   <div className="quantity justify-content-center">
-                    <button
+                    {/* <button
                       className="dec-btn p-0"
                       style={{ cursor: "pointer" }}
                       onClick={() =>
@@ -135,15 +141,15 @@ function ListCart(props) {
                       }
                     >
                       <i className="fas fa-caret-left"></i>
-                    </button>
+                    </button> */}
                     <input
                       className="form-control form-control-sm border-0 shadow-0 p-0"
-                      type="text"
+                      type="number"
                       name="order"
                       value={value.count}
-                      onChange={(e) => handlerChangeText(e, value)}
+                      onChange={(e) => handlerChangeText(e, index)}
                     />
-                    <button
+                    {/* <button
                       className="inc-btn p-0"
                       style={{ cursor: "pointer" }}
                       onClick={() =>
@@ -151,7 +157,7 @@ function ListCart(props) {
                       }
                     >
                       <i className="fas fa-caret-right"></i>
-                    </button>
+                    </button> */}
                   </div>
                 </td>
                 <td className="align-middle border-0">
@@ -166,7 +172,9 @@ function ListCart(props) {
                   <a
                     className="reset-anchor remove_cart"
                     style={{ cursor: "pointer" }}
-                    onClick={() => handlerDelete(value.idUser, value.idProduct)}
+                    onClick={() =>
+                      handlerDelete(value.idUser, value.idProduct, value.count)
+                    }
                   >
                     <i className="fas fa-trash-alt small text-muted"></i>
                   </a>

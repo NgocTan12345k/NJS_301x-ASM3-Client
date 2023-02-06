@@ -2,41 +2,20 @@ import React, { useEffect, useState } from "react";
 import "./Chat.css";
 import queryString from "query-string";
 import axios from "axios";
-import ChatRoomsAPI from "../../API/ChatRoomsAPI";
-import { useSelector } from "react-redux";
-
 import io from "socket.io-client";
 import MessengerAPI from "../../API/MessengerAPI";
-// const socket = io('http://54.254.177.24:5000', { transports: ['websocket'] });
-// const socket = io("http://localhost:3500", {
-//   transports: ["websocket"],
-// });
-const socket = io(
-  "http://localhost:3500",
-  // {
-  // withCredentials: true,
-  // extraHeaders: {
-  //   "my-custom-header": "abcd",
-  // },
-  // }
-  { transports: ["websocket"] }
-);
+
+const socket = io("http://localhost:3500", { transports: ["websocket"] });
 
 function Chat(props) {
   const [activeChat, setActiveChat] = useState(false);
   const [textMessage, setTextMessage] = useState("");
   const [message, setMessage] = useState("");
-  // const [roomId, setRoomId] = useState(
-  //   localStorage.getItem("njs_asm3_roomId") || ""
-  // );
 
   const id_counselor = "63cebfeb9da5ee68f0215dfe";
   const [id_user, setId_user] = useState(localStorage.getItem("id_user"));
   const roomId = localStorage.getItem("roomId");
 
-  // console.log("id_user-->", id_user);
-
-  // console.log("message-->", message);
   //Get id_user từ redux khi user đã đăng nhập
   const [load, setLoad] = useState(false);
 
@@ -49,11 +28,9 @@ function Chat(props) {
       localStorage.setItem("roomId", roomId);
       // Tạo 1 conversation nếu user chưa đăng nhập
       const postConversation = async () => {
-        //  console.log("email-->", email);
         const params = {
           email: "email_temp",
           roomId: roomId,
-          //   password: password,
         };
 
         const query = "?" + queryString.stringify(params);
@@ -68,17 +45,14 @@ function Chat(props) {
         const res = await axios.get(
           `http://localhost:3500/api/users/${roomId}`
         );
-        // console.log("res-->", res);
         const data = res && res.data ? res.data : [];
         setId_user(data);
       };
       getId_userByRoomId();
     }
   };
-  // console.log("id_user", id_user);
 
   const onChangeText = (e) => {
-    // console.log("e.taget.value-->", e.target.value);
     setTextMessage(e.target.value);
   };
 
@@ -88,12 +62,6 @@ function Chat(props) {
     // Check if roomId is null then create new Room
 
     if (localStorage.getItem("id_temp")) {
-      // const newRoomData = await ChatRoomsAPI.createNewRoom();
-      // console.log("newRoomData-->", newRoomData);
-      // setRoomId(newRoomData._id);
-      // localStorage.setItem("njs_asm3_roomId", newRoomData._id);
-
-      // console.log("textMessenger-->", textMessage);
       const data = {
         id_counselor: localStorage.getItem("id_temp"),
         id_user: id_counselor,
@@ -102,10 +70,6 @@ function Chat(props) {
         category: "send",
       };
       socket.emit("send_message", data);
-      // setTimeout(() => {
-      //   setLoad(true);
-      //   socket.emit("send_message", data);
-      // }, 200);
 
       //Postdata lên api đưa dữ liệu vào database
 
@@ -128,10 +92,6 @@ function Chat(props) {
         category: "send",
       };
       socket.emit("send_message", data);
-      // setTimeout(() => {
-      //   setLoad(true);
-      //   socket.emit("send_message", data);
-      // }, 200);
 
       //Postdata lên api đưa dữ liệu vào database
 
@@ -149,11 +109,6 @@ function Chat(props) {
 
     // Check if text equal "/end" then end room
     if (roomId && textMessage.toLowerCase() === "/end") {
-      // await ChatRoomsAPI.addMessage({
-      //   message: "==END ROOM==",
-      //   roomId: roomId,
-      //   is_admin: false,
-      // });
       const deleteMessenger = async () => {
         const res = await axios.delete(
           `http://localhost:3500/api/messenger/deleteMessenger/${roomId}`
@@ -170,29 +125,7 @@ function Chat(props) {
 
       return;
     }
-
-    // const data = {
-    //   message: textMessage,
-    //   roomId: roomId,
-    //   is_admin: false,
-    // };
-    // console.log("data-->", data);
-
-    // //Tiếp theo nó sẽ postdata lên api đưa dữ liệu vào database
-    // await ChatRoomsAPI.addMessage(data);
-    // setTextMessage("");
-
-    // setTimeout(() => {
-    //   setLoad(true);
-    //   socket.emit("send_message", data);
-    // }, 200);
   };
-
-  // const fetchData = async () => {
-  //   const response = await ChatRoomsAPI.getMessageByRoomId(roomId);
-  //   console.log("response-->", response);
-  //   setMessage(response.content);
-  // };
 
   // Hàm này dùng để load dữ liệu message của user khi user gửi tin nhán
   useEffect(() => {
@@ -234,15 +167,10 @@ function Chat(props) {
     fetchMessage();
   }, [id_user]);
 
-  // useEffect(() => {
-  //   setLoad(true);
-  // }, [roomId]);
-
   //Hàm này dùng để nhận socket từ server gửi lên
   useEffect(() => {
     //Nhận dữ liệu từ server gửi lên thông qua socket với key receive_message
     socket.on("receive_message", (data) => {
-      // console.log("data2-->", data);
       //Sau đó nó sẽ setLoad gọi lại hàm useEffect lấy lại dữ liệu
       setLoad(true);
     });
@@ -290,14 +218,13 @@ function Chat(props) {
                 <h4 className="card-title">
                   <strong>Customer Support</strong>
                 </h4>{" "}
-                <a className="btn btn-xs btn-secondary" href="#">
+                <a className="btn btn-xs btn-secondary" href="/#">
                   Let's Chat App
                 </a>
               </div>
               <div className="ps-container ps-theme-default ps-active-y fix_scoll">
                 {message &&
                   message.map((value) =>
-                    // !value.is_admin ? (
                     value.category === "send" ? (
                       <div
                         className="media media-chat media-chat-reverse"
@@ -334,19 +261,14 @@ function Chat(props) {
                   onChange={onChangeText}
                   value={textMessage}
                   style={{ width: "80%" }}
-                  onKeyPress={(e) => {
-                    if (e.key === "Enter") {
-                      handlerSend();
-                    }
-                  }}
                 />
-                <a
+                <button
                   onClick={handlerSend}
                   className="publisher-btn text-info"
                   data-abc="true"
                 >
                   <i className="fa fa-paper-plane"></i>
-                </a>
+                </button>
               </div>
             </div>
           </div>
