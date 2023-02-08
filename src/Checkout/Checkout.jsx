@@ -6,7 +6,7 @@ import convertMoney from "../convertMoney";
 import "./Checkout.css";
 
 import io from "socket.io-client";
-const socket = io("http://localhost:3500");
+const socket = io("https://ecommerce-app-server.onrender.com");
 
 function Checkout(props) {
   const [carts, setCarts] = useState([]);

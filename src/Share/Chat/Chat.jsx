@@ -5,7 +5,9 @@ import io from "socket.io-client";
 import MessengerAPI from "../../API/MessengerAPI";
 import UserAPI from "../../API/UserAPI";
 
-const socket = io("http://localhost:3500", { transports: ["websocket"] });
+const socket = io("https://ecommerce-app-server.onrender.com", {
+  transports: ["websocket"],
+});
 
 function Chat(props) {
   const [activeChat, setActiveChat] = useState(false);
