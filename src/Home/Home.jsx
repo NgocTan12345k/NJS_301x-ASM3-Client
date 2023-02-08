@@ -1,20 +1,24 @@
 import React, { useEffect, useState } from "react";
-// import ProductAPI from "../API/ProductAPI";
+import ProductAPI from "../API/ProductAPI";
 import Image from "../Share/img/Image";
 import convertMoney from "../convertMoney";
 import { Link } from "react-router-dom";
-import axios from "axios";
 
 function Home(props) {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
     const getAllProducts = async () => {
-      const res = await axios.get(
-        "http://localhost:3500/api/product/getAllProducts"
-      );
-      const data = res && res.data ? res.data : [];
-      setProducts(data);
+      try {
+        const response = await ProductAPI.getAllProduct();
+        setProducts(response);
+      } catch (error) {
+        console.log(error);
+      }
+      // const res = await axios.get(
+      //   "http://localhost:3500/api/product/getAllProducts"
+      // );
+      // const data = res && res.data ? res.data : [];
     };
 
     getAllProducts();

@@ -1,9 +1,9 @@
 import axiosClient from "./axiosClient";
 
 const CheckoutAPI = {
-  postOrder: (query) => {
-    const url = `/api/order/postOrder${query}`;
-    return axiosClient.post(url);
+  postOrder: (data) => {
+    const url = "/order/postOrder";
+    return axiosClient.post(url, data);
   },
 };
 

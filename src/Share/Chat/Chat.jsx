@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import "./Chat.css";
 import queryString from "query-string";
-import axios from "axios";
 import io from "socket.io-client";
 import MessengerAPI from "../../API/MessengerAPI";
+import UserAPI from "../../API/UserAPI";
 
 const socket = io("http://localhost:3500", { transports: ["websocket"] });
 
@@ -42,11 +42,17 @@ function Chat(props) {
       postConversation();
     } else {
       const getId_userByRoomId = async () => {
-        const res = await axios.get(
-          `http://localhost:3500/api/users/${roomId}`
-        );
-        const data = res && res.data ? res.data : [];
-        setId_user(data);
+        try {
+          const response = await UserAPI.getId_userByRoomId(roomId);
+          console.log("res-->", response);
+          setId_user(response);
+        } catch (error) {
+          console.log(error);
+        }
+        // const res = await axios.get(
+        //   `http://localhost:3500/api/users/${roomId}`
+        // );
+        // const data = res && res.data ? res.data : [];
       };
       getId_userByRoomId();
     }
@@ -110,16 +116,21 @@ function Chat(props) {
     // Check if text equal "/end" then end room
     if (roomId && textMessage.toLowerCase() === "/end") {
       const deleteMessenger = async () => {
-        const res = await axios.delete(
-          `http://localhost:3500/api/messenger/deleteMessenger/${roomId}`
-        );
-        const data = res && res.data ? res.data : [];
-        console.log("data-->", data);
+        try {
+          const response = await MessengerAPI.deleteMessenger(roomId);
+          console.log("res-->", response);
+        } catch (error) {
+          console.log(error);
+        }
+        // const res = await axios.delete(
+        //   `http://localhost:3500/api/messenger/deleteMessenger/${roomId}`
+        // );
+        // const data = res && res.data ? res.data : [];
+        // console.log("data-->", data);
       };
       deleteMessenger();
       localStorage.removeItem("roomId");
       setTextMessage("");
-      // setRoomId("");
       setMessage("");
       setActiveChat(false);
 

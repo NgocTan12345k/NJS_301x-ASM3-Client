@@ -6,6 +6,7 @@ import "./Auth.css";
 import queryString from "query-string";
 import CartAPI from "../API/CartAPI";
 import MessengerAPI from "../API/MessengerAPI";
+import AuthAPI from "../API/AuthAPI";
 
 function SignIn(props) {
   //listCart được lấy từ redux
@@ -50,60 +51,104 @@ function SignIn(props) {
           return;
         } else {
           setEmailRegex(false);
-          const Signin = () => {
-            fetch("http://localhost:3500/api/auth/login", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              credentials: "include",
-              body: JSON.stringify({
+          const Signin = async () => {
+            try {
+              const data = {
                 email: email,
                 password: password,
-              }),
-            })
-              .then((res) => {
-                console.log("res-->", res.clone().json());
-                return res.clone().json();
-              })
-              .then((data) => {
-                console.log("data-->", data);
-                if (data.message === "Login successful") {
-                  const roomId = Math.random().toString();
-                  localStorage.setItem("roomId", roomId);
-                  localStorage.removeItem("id_temp");
-                  localStorage.setItem("id_user", data.user.userId);
-                  localStorage.setItem("name_user", data.user.userName);
-                  localStorage.setItem("role", data.user.role);
+              };
 
-                  const action = addSession(localStorage.getItem("id_user"));
-                  dispatch(action);
-                  setCheckPush(true);
+              const response = await AuthAPI.postSignIn(data);
+              if (response.message === "Login successful") {
+                const roomId = Math.random().toString();
+                localStorage.setItem("roomId", roomId);
+                localStorage.removeItem("id_temp");
+                localStorage.setItem("id_user", response.user.userId);
+                localStorage.setItem("name_user", response.user.userName);
+                localStorage.setItem("role", response.user.role);
 
-                  // Hàm này dùng để tạo các conversation cho user và admin
-                  const postConversation = async () => {
-                    const params = {
-                      email: email,
-                      roomId: roomId,
-                    };
+                const action = addSession(localStorage.getItem("id_user"));
+                dispatch(action);
+                setCheckPush(true);
 
-                    const query = "?" + queryString.stringify(params);
-
-                    const response = await MessengerAPI.postConversation(query);
-                    console.log("response-->", response);
+                // Hàm này dùng để tạo các conversation cho user và admin
+                const postConversation = async () => {
+                  const params = {
+                    email: email,
+                    roomId: roomId,
                   };
 
-                  postConversation();
-                } else if (data.message === "Wrong email") {
-                  setErrorEmail(true);
-                  return;
-                } else if (data.message === "Wrong password") {
-                  setErrorEmail(false);
-                  setErrorPassword(true);
-                  return;
-                }
-              })
-              .catch((e) => {
-                console.log(e);
-              });
+                  const query = "?" + queryString.stringify(params);
+
+                  const response = await MessengerAPI.postConversation(query);
+                  console.log("response-->", response);
+                };
+
+                postConversation();
+              } else if (data.message === "Wrong email") {
+                setErrorEmail(true);
+                return;
+              } else if (data.message === "Wrong password") {
+                setErrorEmail(false);
+                setErrorPassword(true);
+                return;
+              }
+            } catch (error) {
+              console.log(error);
+            }
+            // fetch("http://localhost:3500/api/auth/login", {
+            //   method: "POST",
+            //   headers: { "Content-Type": "application/json" },
+            //   credentials: "include",
+            //   body: JSON.stringify({
+            //     email: email,
+            //     password: password,
+            //   }),
+            // })
+            //   .then((res) => {
+            //     console.log("res-->", res.clone().json());
+            //     return res.clone().json();
+            //   })
+            //   .then((data) => {
+            //     console.log("data-->", data);
+            //     if (data.message === "Login successful") {
+            //       const roomId = Math.random().toString();
+            //       localStorage.setItem("roomId", roomId);
+            //       localStorage.removeItem("id_temp");
+            //       localStorage.setItem("id_user", data.user.userId);
+            //       localStorage.setItem("name_user", data.user.userName);
+            //       localStorage.setItem("role", data.user.role);
+
+            //       const action = addSession(localStorage.getItem("id_user"));
+            //       dispatch(action);
+            //       setCheckPush(true);
+
+            //       // Hàm này dùng để tạo các conversation cho user và admin
+            //       const postConversation = async () => {
+            //         const params = {
+            //           email: email,
+            //           roomId: roomId,
+            //         };
+
+            //         const query = "?" + queryString.stringify(params);
+
+            //         const response = await MessengerAPI.postConversation(query);
+            //         console.log("response-->", response);
+            //       };
+
+            //       postConversation();
+            //     } else if (data.message === "Wrong email") {
+            //       setErrorEmail(true);
+            //       return;
+            //     } else if (data.message === "Wrong password") {
+            //       setErrorEmail(false);
+            //       setErrorPassword(true);
+            //       return;
+            //     }
+            //   })
+            //   .catch((e) => {
+            //     console.log(e);
+            //   });
           };
           Signin();
         }

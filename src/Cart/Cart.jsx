@@ -1,38 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { deleteCart, updateCart } from "../Redux/Action/ActionCart";
 import ListCart from "./Component/ListCart";
 import alertify from "alertifyjs";
 import { Link, Redirect } from "react-router-dom";
 import CartAPI from "../API/CartAPI";
 import queryString from "query-string";
 import convertMoney from "../convertMoney";
+import ProductAPI from "../API/ProductAPI";
 
 function Cart(props) {
-  //id_user được lấy từ redux
-  // const id_user = useSelector((state) => {
-  //   // console.log("state-->", state);
-  //   return state.Cart.id_user;
-  // });
-
-  // console.log("id_user-->0", id_user);
-
-  //listCart được lấy từ redux
-  const listCart = useSelector((state) => state.Cart.listCart);
-
-  // console.log("listCart-->", listCart);
-
   const [cart, setCart] = useState([]);
   const [total, setTotal] = useState();
   const [updateListCart, setUpdateListCart] = useState([]);
-
-  const dispatch = useDispatch();
-
-  //State dùng để Load dữ liệu từ Redux
-  // const [loadRedux, setLoadRedux] = useState({
-  //   idProduct: "",
-  //   count: "",
-  // });
 
   //State dùng để Load dữ liệu từ API
   const [loadAPI, setLoadAPI] = useState(false);
@@ -64,8 +42,6 @@ function Cart(props) {
 
         const response = await CartAPI.getCarts(query);
 
-        // console.log("response-->", response);
-
         setCart(response);
 
         getTotal(response);
@@ -78,15 +54,8 @@ function Cart(props) {
   }, [loadAPI]);
 
   //Hàm này dùng để truyền xuống cho component con xử và trả ngược dữ liệu lại component cha
-  const onDeleteCart = (getUser, getProduct, getCount) => {
-    // console.log(
-    //   "Count: " +
-    //     getCount +
-    //     ",idUser: " +
-    //     getUser +
-    //     ", idProduct: " +
-    //     getProduct
-    // );
+  const onDeleteCart = (getUser, getProduct) => {
+    console.log("idUser: " + getUser + ", idProduct: " + getProduct);
 
     if (localStorage.getItem("id_user")) {
       // user đã đăng nhập
@@ -101,7 +70,7 @@ function Cart(props) {
         const query = "?" + queryString.stringify(params);
 
         const response = await CartAPI.deleteToCart(query);
-        // console.log("response-->", response);
+        console.log("response-->", response);
       };
 
       fetchDelete();
@@ -118,9 +87,6 @@ function Cart(props) {
   const [redirect, setRedirect] = useState(false);
 
   const onCheckout = () => {
-    console.log("updateListCart-->", updateListCart);
-    console.log("cart-->", cart);
-
     if (updateListCart && updateListCart.length > 0) {
       const idProductList = updateListCart.map((item) => {
         return item.idProduct;
@@ -134,51 +100,79 @@ function Cart(props) {
       const idCartList = updateListCart.map((item) => {
         return item._id;
       });
-      const updateProductQuantity = () => {
-        fetch(`http://localhost:3500/api/product/updateQuantity`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
+      const updateProductQuantity = async () => {
+        try {
+          const data = {
             idProductList: idProductList,
             countList: countList,
-          }),
-        })
-          .then((res) => {
-            return res.json();
-          })
-          .then((data) => {
-            if (data) {
-              console.log("data-->", data);
-            } else {
-              alert("Update Product Quantity unsuccessful!");
-            }
-          })
-          .catch((error) => {
-            console.log(error);
-          });
+          };
+          const response = await ProductAPI.updateProductQuantity(data);
+          if (response) {
+            console.log("response-->", response);
+          } else {
+            alert("Update Product Quantity unsuccessful!");
+          }
+        } catch (error) {
+          console.log(error);
+        }
+        // fetch(`http://localhost:3500/api/product/updateQuantity`, {
+        //   method: "PUT",
+        //   headers: { "Content-Type": "application/json" },
+        //   body: JSON.stringify({
+        //     idProductList: idProductList,
+        //     countList: countList,
+        //   }),
+        // })
+        //   .then((res) => {
+        //     return res.json();
+        //   })
+        //   .then((data) => {
+        //     if (data) {
+        //       console.log("data-->", data);
+        //     } else {
+        //       alert("Update Product Quantity unsuccessful!");
+        //     }
+        //   })
+        //   .catch((error) => {
+        //     console.log(error);
+        //   });
       };
-      const updateCartCount = () => {
-        fetch(`http://localhost:3500/api/carts/update`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
+      const updateCartCount = async () => {
+        try {
+          const data = {
             idCartList: idCartList,
             countList: countList,
-          }),
-        })
-          .then((res) => {
-            return res.json();
-          })
-          .then((data) => {
-            if (data) {
-              console.log("data-->", data);
-            } else {
-              alert("Update Cart count unsuccessful!");
-            }
-          })
-          .catch((error) => {
-            console.log(error);
-          });
+          };
+          const response = await CartAPI.updateCartCount(data);
+          if (response) {
+            console.log("response-->", response);
+          } else {
+            alert("Update Cart count unsuccessful!");
+          }
+        } catch (error) {
+          console.log(error);
+        }
+        // fetch(`http://localhost:3500/api/carts/update`, {
+        //   method: "PUT",
+        //   headers: { "Content-Type": "application/json" },
+        //   body: JSON.stringify({
+        //     idCartList: idCartList,
+        //     countList: countList,
+        //   }),
+        // })
+        //   .then((res) => {
+        //     return res.json();
+        //   })
+        //   .then((data) => {
+        //     if (data) {
+        //       console.log("data-->", data);
+        //     } else {
+        //       alert("Update Cart count unsuccessful!");
+        //     }
+        //   })
+        //   .catch((error) => {
+        //     console.log(error);
+        //   });
       };
       updateCartCount();
       updateProductQuantity();
@@ -186,7 +180,6 @@ function Cart(props) {
       const idProductList = cart.map((item) => {
         return item.idProduct;
       });
-      // console.log("idProductList-->", idProductList);
       const countList = cart.map((item) => {
         return parseInt(item.count);
       });
@@ -194,51 +187,79 @@ function Cart(props) {
       const idCartList = cart.map((item) => {
         return item._id;
       });
-      const updateProductQuantity = () => {
-        fetch(`http://localhost:3500/api/product/updateQuantity`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
+      const updateProductQuantity = async () => {
+        try {
+          const data = {
             idProductList: idProductList,
             countList: countList,
-          }),
-        })
-          .then((res) => {
-            return res.json();
-          })
-          .then((data) => {
-            if (data) {
-              console.log("data-->", data);
-            } else {
-              alert("Update Product Quantity unsuccessful!");
-            }
-          })
-          .catch((error) => {
-            console.log(error);
-          });
+          };
+          const response = await ProductAPI.updateProductQuantity(data);
+          if (response) {
+            console.log("response-->", response);
+          } else {
+            alert("Update Product Quantity unsuccessful!");
+          }
+        } catch (error) {
+          console.log(error);
+        }
+        // fetch(`http://localhost:3500/api/product/updateQuantity`, {
+        //   method: "PUT",
+        //   headers: { "Content-Type": "application/json" },
+        //   body: JSON.stringify({
+        //     idProductList: idProductList,
+        //     countList: countList,
+        //   }),
+        // })
+        //   .then((res) => {
+        //     return res.json();
+        //   })
+        //   .then((data) => {
+        //     if (data) {
+        //       console.log("data-->", data);
+        //     } else {
+        //       alert("Update Product Quantity unsuccessful!");
+        //     }
+        //   })
+        //   .catch((error) => {
+        //     console.log(error);
+        //   });
       };
-      const updateCartCount = () => {
-        fetch(`http://localhost:3500/api/carts/update`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
+      const updateCartCount = async () => {
+        try {
+          const data = {
             idCartList: idCartList,
             countList: countList,
-          }),
-        })
-          .then((res) => {
-            return res.json();
-          })
-          .then((data) => {
-            if (data) {
-              console.log("data-->", data);
-            } else {
-              alert("Update Cart count unsuccessful!");
-            }
-          })
-          .catch((error) => {
-            console.log(error);
-          });
+          };
+          const response = await CartAPI.updateCartCount(data);
+          if (response) {
+            console.log("response-->", response);
+          } else {
+            alert("Update Cart count unsuccessful!");
+          }
+        } catch (error) {
+          console.log(error);
+        }
+        // fetch(`http://localhost:3500/api/carts/update`, {
+        //   method: "PUT",
+        //   headers: { "Content-Type": "application/json" },
+        //   body: JSON.stringify({
+        //     idCartList: idCartList,
+        //     countList: countList,
+        //   }),
+        // })
+        //   .then((res) => {
+        //     return res.json();
+        //   })
+        //   .then((data) => {
+        //     if (data) {
+        //       console.log("data-->", data);
+        //     } else {
+        //       alert("Update Cart count unsuccessful!");
+        //     }
+        //   })
+        //   .catch((error) => {
+        //     console.log(error);
+        //   });
       };
       updateCartCount();
       updateProductQuantity();
@@ -258,8 +279,6 @@ function Cart(props) {
 
     setRedirect(true);
   };
-
-  // console.log("cart-->", cart);
 
   return (
     <div className="container">

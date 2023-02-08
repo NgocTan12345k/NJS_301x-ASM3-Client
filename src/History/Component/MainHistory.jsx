@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 // import HistoryAPI from '../../API/HistoryAPI';
 // import queryString from 'query-string';
-import axios from "axios";
 import convertMoney from "../../convertMoney";
+import OrderAPI from "../../API/OrderAPI";
 
 MainHistory.propTypes = {};
 
@@ -12,23 +12,18 @@ function MainHistory(props) {
 
   useEffect(() => {
     const getOrders = async () => {
-      //   const params = {
-      //     idUser: localStorage.getItem("id_user"),
-      //   };
-
-      const idUser = localStorage.getItem("id_user");
-
-      console.log("params-->", idUser);
-      const res = await axios.get(
-        `http://localhost:3500/api/order/getOrder?idUser=${idUser}`
-      );
-      const data = res && res.data ? res.data : [];
-      // const query = '?' + queryString.stringify(params);
-
-      // const response = await HistoryAPI.getHistoryAPI(query);
-      //   console.log("data-->", data);
-
-      setListCart(data);
+      try {
+        const idUser = localStorage.getItem("id_user");
+        const response = await OrderAPI.getOrder(idUser);
+        console.log("response-->", response);
+        setListCart(response);
+        // const res = await axios.get(
+        //   `http://localhost:3500/api/order/getOrder?idUser=${idUser}`
+        // );
+        // const data = res && res.data ? res.data : [];
+      } catch (error) {
+        console.log(error);
+      }
     };
 
     getOrders();
@@ -120,18 +115,10 @@ function MainHistory(props) {
                     </p>
                   </td>
                   <td className="align-middle border-0">
-                    <p className="mb-0 small">
-                      {/* {!value.delivery
-                        ? "Waiting for progressing"
-                        : "Processed"} */}
-                      {value.delivery}
-                    </p>
+                    <p className="mb-0 small">{value.delivery}</p>
                   </td>
                   <td className="align-middle border-0">
-                    <p className="mb-0 small">
-                      {/* {!value.status ? "Waiting for pay" : "Paid"} */}
-                      {value.status}
-                    </p>
+                    <p className="mb-0 small">{value.status}</p>
                   </td>
                   <td className="align-middle border-0">
                     <Link

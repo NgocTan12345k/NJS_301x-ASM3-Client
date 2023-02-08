@@ -1,8 +1,8 @@
-import axios from "axios";
+import CartAPI from "../../API/CartAPI";
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-// import HistoryAPI from "../../API/HistoryAPI";
 import convertMoney from "../../convertMoney";
+import OrderAPI from "../../API/OrderAPI";
 
 function DetailHistory(props) {
   const { id } = useParams();
@@ -15,32 +15,36 @@ function DetailHistory(props) {
 
   useEffect(() => {
     const getOrderDetail = async () => {
-      // const response = await HistoryAPI.getDetail(id);
-      // console.log(response.cart);
-      const res = await axios.get(
-        `http://localhost:3500/api/order/getOrderDetail/${id}`
-      );
-      //   console.log("res-->", res);
-      const data = res && res.data ? res.data : [];
-      setInformation(data);
-
-      // setCart(response.cart);
-
-      // console.log(response);
+      try {
+        const response = await OrderAPI.getOrderDetail(id);
+        console.log("response-->", response);
+        setInformation(response);
+      } catch (error) {
+        console.log(error);
+      }
+      // const res = await axios.get(
+      //   `http://localhost:3500/api/order/getOrderDetail/${id}`
+      // );
+      // const data = res && res.data ? res.data : [];
     };
     const getCartByUser = async () => {
       const idUser = localStorage.getItem("id_user");
-      console.log("idUser-->", idUser);
-      const res = await axios.get(
-        `http://localhost:3500/api/carts?idUser=${idUser}`
-      );
-      // console.log("res-->", res);
-      const data = res && res.data ? res.data : [];
-      setCart(data);
+      try {
+        const response = await CartAPI.getCartsByUser(idUser);
+        console.log("res-->", response);
+        setCart(response);
+      } catch (error) {
+        console.log(error);
+      }
+      // const res = await axios.get(
+      //   `http://localhost:3500/api/carts?idUser=${idUser}`
+      // );
+      // const data = res && res.data ? res.data : [];
     };
     getOrderDetail();
     getCartByUser();
   }, [id]);
+  console.log("cart-->", cart);
 
   return (
     <div className="container">

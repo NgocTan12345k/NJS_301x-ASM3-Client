@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, Redirect } from "react-router-dom";
+import AuthAPI from "../API/AuthAPI";
 import "./Auth.css";
 SignUp.propTypes = {};
 
@@ -91,39 +92,66 @@ function SignUp(props) {
               setPhoneError(true);
               setPasswordError(false);
             } else {
-              console.log("Thanh Cong");
-              console.log("fullname-->", fullname);
               const SignUp = async () => {
-                fetch("http://localhost:3500/api/auth/signup", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  credentials: "same-origin",
-                  body: JSON.stringify({
+                try {
+                  const data = JSON.stringify({
                     userName: fullname,
                     email: email,
                     password: password,
                     phone: phone,
-                  }),
-                })
-                  .then((res) => {
-                    console.log("res-->", res.clone().json());
-                    return res.clone().json();
-                  })
-                  .then((data) => {
-                    console.log("data-->", data);
-                    if (data.message === "UserName already exists") {
-                      setFullnameError(true);
-                    } else if (data.message === "Email already exists") {
-                      setEmailError(true);
-                    } else if (data.message === "Phone already exists") {
-                      setPhoneError(true);
-                    } else {
-                      setSuccess(true);
-                    }
-                  })
-                  .catch((error) => {
-                    console.log(error);
                   });
+                  const response = await AuthAPI.postSignUp(data);
+                  if (
+                    response &&
+                    response.message === "UserName already exists"
+                  ) {
+                    setFullnameError(true);
+                  } else if (
+                    response &&
+                    response.message === "Email already exists"
+                  ) {
+                    setEmailError(true);
+                  } else if (
+                    response &&
+                    response.message === "Phone already exists"
+                  ) {
+                    setPhoneError(true);
+                  } else {
+                    setSuccess(true);
+                  }
+                } catch (error) {
+                  console.log(error);
+                }
+                // fetch("http://localhost:3500/api/auth/signup", {
+                //   method: "POST",
+                //   headers: { "Content-Type": "application/json" },
+                //   credentials: "same-origin",
+                //   body: JSON.stringify({
+                //     userName: fullname,
+                //     email: email,
+                //     password: password,
+                //     phone: phone,
+                //   }),
+                // })
+                //   .then((res) => {
+                //     console.log("res-->", res.clone().json());
+                //     return res.clone().json();
+                //   })
+                //   .then((data) => {
+                //     console.log("data-->", data);
+                //     if (data.message === "UserName already exists") {
+                //       setFullnameError(true);
+                //     } else if (data.message === "Email already exists") {
+                //       setEmailError(true);
+                //     } else if (data.message === "Phone already exists") {
+                //       setPhoneError(true);
+                //     } else {
+                //       setSuccess(true);
+                //     }
+                //   })
+                //   .catch((error) => {
+                //     console.log(error);
+                //   });
               };
               SignUp();
             }

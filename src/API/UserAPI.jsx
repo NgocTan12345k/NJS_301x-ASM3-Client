@@ -1,19 +1,8 @@
 import axiosClient from "./axiosClient";
-
 const UserAPI = {
-  getAllData: () => {
-    const url = "/auth";
+  getId_userByRoomId: (roomId) => {
+    const url = `/users/${roomId}`;
     return axiosClient.get(url);
-  },
-
-  getDetailData: (id) => {
-    const url = `/auth/${id}`;
-    return axiosClient.get(url);
-  },
-
-  postSignUp: (query) => {
-    const url = `/auth/signup/${query}`;
-    return axiosClient.post(url);
   },
 };
 

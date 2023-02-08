@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from "react";
-// import ProductAPI from "../API/ProductAPI";
 import { Link, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import alertify from "alertifyjs";
 import { addCart } from "../Redux/Action/ActionCart";
 import CartAPI from "../API/CartAPI";
 import queryString from "query-string";
-// import CommentAPI from "../API/CommentAPI";
 import convertMoney from "../convertMoney";
-import axios from "axios";
+import ProductAPI from "../API/ProductAPI";
 
 function Detail(props) {
   const [detail, setDetail] = useState({});
@@ -18,40 +16,44 @@ function Detail(props) {
   //id params cho từng sản phẩm
   const { id } = useParams();
 
-  //   console.log("id-->", id);
-
   //id_user được lấy từ redux
   const id_user = useSelector((state) => {
-    // console.log("state-->", state);
     return state.Cart.id_user;
   });
-  // console.log("id_user-->", id_user);
 
   //listCart được lấy từ redux
-  const listCart = useSelector((state) => state.Cart.listCart);
+  // const listCart = useSelector((state) => state.Cart.listCart);
   // console.log("listCart-->", listCart);
 
   const [product, setProduct] = useState([]);
 
   // id_user đã đăng nhập
-  const idUser = useSelector((state) => state.Session.idUser);
+  // const idUser = useSelector((state) => state.Session.idUser);
 
   useEffect(() => {
     //Hàm này để lấy dữ liệu chi tiết sản phẩm
     const getProductDetail = async () => {
-      const res = await axios.get(`http://localhost:3500/api/product/${id}`);
-      const response = res && res.data ? res.data : [];
-      setDetail(response);
+      try {
+        const response = await ProductAPI.getProductDetail(id);
+        setDetail(response);
+      } catch (error) {
+        console.log(error);
+      }
+      // const res = await axios.get(`http://localhost:3500/api/product/${id}`);
+      // const response = res && res.data ? res.data : [];
       // console.log("res-->", res);
     };
-    //Hàm này gọi API và cắt chỉ lấy 4 sản phẩm
     const getAllProducts = async () => {
-      const res = await axios.get(
-        "http://localhost:3500/api/product/getAllProducts"
-      );
-      const data = res && res.data ? res.data : [];
-      setProduct(data);
-      //   console.log("res-->", data);
+      try {
+        const response = await ProductAPI.getAllProduct();
+        setProduct(response);
+      } catch (error) {
+        console.log(error);
+      }
+      // const res = await axios.get(
+      //   "http://localhost:3500/api/product/getAllProducts"
+      // );
+      // const data = res && res.data ? res.data : [];
     };
     getProductDetail();
     getAllProducts();
@@ -132,12 +134,7 @@ function Detail(props) {
               count: text, // Lấy số lượng
             };
 
-            // console.log("params-->", params);
-
             const query = "?" + queryString.stringify(params);
-
-            // console.log("query-->", query);
-
             const response = await CartAPI.postAddToCart(query);
             console.log("response-->", response);
           };

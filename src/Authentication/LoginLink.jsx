@@ -2,8 +2,8 @@ import React from "react";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import { deleteSession } from "../Redux/Action/ActionSession";
-
-import axios from "axios";
+import MessengerAPI from "../API/MessengerAPI";
+import AuthAPI from "../API/AuthAPI";
 
 function LoginLink(props) {
   const roomId = localStorage.getItem("roomId");
@@ -11,22 +11,38 @@ function LoginLink(props) {
 
   const onRedirect = () => {
     const deleteMessenger = async () => {
-      const res = await axios.delete(
-        `http://localhost:3500/api/messenger/deleteMessenger/${roomId}`
-      );
-      const data = res && res.data ? res.data : [];
-      console.log("data-->", data);
-      if (data === "Delete Messenger success!") {
-        localStorage.clear();
-        localStorage.setItem("id_temp", "abc999");
+      try {
+        const response = await MessengerAPI.deleteMessenger(roomId);
+        console.log("res-->", response);
+        if (response === "Delete Messenger success!") {
+          localStorage.clear();
+          localStorage.setItem("id_temp", "abc999");
+        }
+      } catch (error) {
+        console.log(error);
       }
+      // const res = await axios.delete(
+      //   `http://localhost:3500/api/messenger/deleteMessenger/${roomId}`
+      // );
+      // const data = res && res.data ? res.data : [];
+      // console.log("data-->", data);
+      // if (data === "Delete Messenger success!") {
+      //   localStorage.clear();
+      //   localStorage.setItem("id_temp", "abc999");
+      // }
     };
     const delete_Session = async () => {
-      const res = await axios.get(
-        "http://localhost:3500/api/auth/deleteSession"
-      );
-      const data = res && res.data ? res.data : [];
-      console.log("data-->", data);
+      try {
+        const response = await AuthAPI.deleteSession();
+        console.log("response-->", response);
+      } catch (error) {
+        console.log(error);
+      }
+      // const res = await axios.get(
+      //   "http://localhost:3500/api/auth/deleteSession"
+      // );
+      // const data = res && res.data ? res.data : [];
+      // console.log("data-->", data);
     };
     delete_Session();
     deleteMessenger();

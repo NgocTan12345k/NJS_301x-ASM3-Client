@@ -43,8 +43,6 @@ function Checkout(props) {
 
         const response = await CartAPI.getCarts(query);
 
-        // console.log(response);
-
         setCarts(response);
 
         getTotal(response);
@@ -58,11 +56,9 @@ function Checkout(props) {
     }
   }, []);
 
-  // console.log("cart-->", carts);
   const idProducts = carts.map((item) => {
     return item._id;
   });
-  // console.log("idProducts-->", idProducts);
 
   //Hàm này dùng để tính tổng tiền carts
   function getTotal(carts) {
@@ -75,9 +71,6 @@ function Checkout(props) {
 
     setTotal(sub_total);
   }
-
-  // console.log("total-->", total);
-  // console.log("sum_total-->", sum_total)
 
   //Check Validation
   const handlerSubmit = () => {
@@ -127,32 +120,52 @@ function Checkout(props) {
               setPhoneError(false);
               setAddressError(true);
             } else {
-              fetch("http://localhost:3500/api/order/postOrder", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                credentials: "same-origin",
-                body: JSON.stringify({
-                  idUser: localStorage.getItem("id_user"),
-                  userName: fullname,
-                  email: email,
-                  phone: phone,
-                  address: address,
-                  idProduct: idProducts,
-                  total: total,
-                  status: "Waitng for pay",
-                  delivery: "Waiting for progressing",
-                }),
-              })
-                .then((res) => {
-                  return res.json();
-                })
-                .then((data) => {
-                  console.log("data-->", data);
-                })
-                .catch((error) => {
+              const checkout = async () => {
+                try {
+                  const data = {
+                    idUser: localStorage.getItem("id_user"),
+                    userName: fullname,
+                    email: email,
+                    phone: phone,
+                    address: address,
+                    idProduct: idProducts,
+                    total: total,
+                    status: "Waitng for pay",
+                    delivery: "Waiting for progressing",
+                  };
+                  const response = await CheckoutAPI.postOrder(data);
+                  console.log("response-->", response);
+                } catch (error) {
                   console.log(error);
-                });
-              console.log("Thanh Cong");
+                }
+              };
+              checkout();
+              // fetch("http://localhost:3500/api/order/postOrder", {
+              //   method: "POST",
+              //   headers: { "Content-Type": "application/json" },
+              //   credentials: "same-origin",
+              //   body: JSON.stringify({
+              //     idUser: localStorage.getItem("id_user"),
+              //     userName: fullname,
+              //     email: email,
+              //     phone: phone,
+              //     address: address,
+              //     idProduct: idProducts,
+              //     total: total,
+              //     status: "Waitng for pay",
+              //     delivery: "Waiting for progressing",
+              //   }),
+              // })
+              //   .then((res) => {
+              //     return res.json();
+              //   })
+              //   .then((data) => {
+              //     console.log("data-->", data);
+              //   })
+              //   .catch((error) => {
+              //     console.log(error);
+              //   });
+              // console.log("Thanh Cong");
 
               setLoad(!load);
             }
