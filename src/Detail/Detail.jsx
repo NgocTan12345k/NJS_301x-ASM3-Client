@@ -169,7 +169,7 @@ function Detail(props) {
       // console.log("action-->", action);
       // dispatch(action);
       alert("You need to be logged in to continue shopping");
-      window.location.assign("http://localhost:3000/signin");
+      window.location.assign("https://njs-301x-asm3-client.vercel.app/signin");
     }
 
     // alertify.set("notifier", "position", "bottom-left");
